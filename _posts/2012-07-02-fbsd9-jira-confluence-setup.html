@@ -1,0 +1,111 @@
+---
+layout: post
+title:  "FreeBSD 9.0 - JIRA and Confluence Setup"
+date:   2012-07-02 15:57:06 -0400
+categories: atlassian jira confluence jekyll
+---
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Source</title>
+        <link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css" media="all">
+<!--[if lt IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=lt+IE+9" media="all">
+<![endif]-->
+<!--[if IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=IE+9" media="all">
+<![endif]-->
+<!--[if lte IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+9" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?media=print" media="print">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/34b5e84e244983672af931d8c9a8841f/_/download/contextbatch/css/plugin.viewsource/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/6e2b0d19baee8ce068ab61cfa7146502/_/download/contextbatch/css/page/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/a65f396e965b778ef79da21b536b34b3/_/download/contextbatch/css/editor-content/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/1/_/styles/colors.css?spaceKey=MAB" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/1.0/_/download/resources/com.atlassian.confluence.themes.default:styles/default-theme.css" media="all">
+
+    </head>
+
+    <body class="mceContentBody wiki-content fullsize">
+        <p>&nbsp;</p>         <h2 class="p1"><strong><img class="editor-inline-macro" src="/wiki/plugins/servlet/confluence/placeholder/macro?definition=e3RvY30&amp;locale=en_GB&amp;version=2" data-macro-name="toc"><br /></strong></h2><h2 class="p1"><strong>Atlassian</strong></h2><h3 class="p2"><strong>JIRA</strong></h3><p>Get root shell. Run...</p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>echo "jira:::::::/home/jira:/bin/csh:" | adduser -f -
+echo "setenv  JAVA_HOME       /usr/local/openjdk6" >> ~jira/.cshrc</pre></td></tr></table><p>You may consider updating this to get the latest version.</p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>wget --no-check-certificate http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-5.0.6.tar.gz
+tar zxvf atlassian-jira-5.0.6.tar.gz
+mv atlassian-jira-5.0.6-standalone atlassian-jira-5.0.6
+
+
+echo "jira.home = /home/jira/jira-data" > /home/jira/atlassian-jira-5.0.6/atlassian-jira/WEB-INF/classes/jira-application.properties
+OR
+echo "export JIRA_HOME = /home/jira/jira-data"; echo "setenv     JIRA_HOME     /home/jira/jira-data" >> ~jira/.cshrc</pre></td></tr></table><h4>PostgreSQL setup</h4><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>su - pgsql
+createuser -S -d -r -P -E jirauser
+createuser -S -d -r -P -E confuser
+passwd: *
+createdb --owner jirauser --encoding utf8 jira
+createdb --owner jirauser --encoding utf8 confluence</pre></td></tr></table><h4 class="p4"><span class="s2">FreeBSD rc.d startup script</span></h4><p class="p4"><span class="s2">Citation: <a href="https://confluence.atlassian.com/display/JIRA044/Starting+JIRA+Standalone+automatically+on+FreeBSD">https://confluence.atlassian.com/display/JIRA044/Starting+JIRA+Standalone+automatically+on+FreeBSD</a></span></p><p class="p2">Create startup script <strong>/usr/local/etc/rc.d/jira</strong></p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>jira_start()
+{
+    echo -n " Starting JIRA"
+    su - jira -c '/home/jira/atlassian-jira-5.0.6/bin/startup.sh'
+}
+
+jira_stop()
+{
+    echo -n " Stopping JIRA"
+    su - jira -c '/home/jira/atlassian-jira-5.0.6/bin/shutdown.sh'
+}
+chmod +x-w /usr/local/etc/rc.d/jira</pre></td></tr></table><p>Enable startup script</p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>echo 'jira_enable="YES"' >> /etc/rc.conf</pre></td></tr></table><p class="p1">pico /usr/home/jira/atlassian-jira-5.1/conf/server.xml</p><p class="p1">     change &lt;Context <strong>path=&quot;&quot;</strong> TO &lt;Context <strong>path=&quot;/jira&quot;</strong></p><h3>Confluence</h3><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>echo "confluence:::::::/home/confluence:/bin/csh:" | adduser -f -
+echo "setenv  JAVA_HOME       /usr/local/openjdk6" >> ~confluence/.cshrc
+OR
+cp ~jira/.cshrc ~confluence/.cshrc</pre></td></tr></table><p> </p><p class="p3"><span class="s1">wget --no-check-certificate <a href="http://www.atlassian.com/software/confluence/downloads/binary/atlassian-confluence-4.2.6.tar.gz"><span class="s2">http://www.atlassian.com/software/confluence/downloads/binary/atlassian-confluence-4.2.6.tar.gz</span></a></span></p><p class="p1">tar zxvf atlassian-confluence-4.2.6.tar.gz</p><p class="p1">pico /home/confluence/atlassian-confluence-4.2.6/conf/server.xml</p><p class="p1">     change &lt;Context <strong>path=&quot;&quot;</strong> TO &lt;Context <strong>path=&quot;/wiki&quot;</strong></p><p class="p2"> </p><p class="p1">mkdir /home/confluence/confluence-data</p><p class="p1">echo &quot;confluence.home = /home/confluence/confluence-data&quot; &gt; /home/confluence/atlassian-confluence-4.2.6/confluence/WEB-INF/classes/confluence-init.properties</p><h4 class="p2">FreeBSD startup script rc.d</h4><p class="p1">create startup script <strong>/usr/local/etc/rc.d/confluence</strong></p><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>confluence_start()
+{
+    echo -n " Starting Confluence"
+    su - confluence -c '/home/confluence/atlassian-confluence-4.2.6/bin/startup.sh'
+}
+
+confluence_stop()
+{
+    echo -n " Stopping Confluence"
+    su - confluence -c '/home/confluence/atlassian-confluence-4.2.6/bin/shutdown.sh'
+    /bin/rm /usr/home/confluence/atlassian-confluence-4.2.6/work/catalina.pid
+}</pre></td></tr></table><p> </p><p class="p1">chmod +x-w /usr/local/etc/rc.d/confluence</p><p class="p2"> </p><p class="p1">echo 'confluence_enable=&quot;YES&quot;' &gt;&gt; /etc/rc.conf</p><p class="p2"> </p><h2 class="p1">Setup/config</h2><h3 class="p1"><strong>Apache</strong></h3><p class="p1">pkg_add -r openssl</p><p class="p1">cp /usr/local/openssl/openssl.cnf.sample /usr/local/openssl/openssl.cnf</p><p class="p1">(edit as desired)</p><p class="p1">ports www/apache22</p><p class="p1">make config, make install, make clean</p><p class="p1">echo 'apache22_enable=&quot;YES&quot;' &gt;&gt; /etc/rc.conf </p><p class="p2"> </p><p class="p1">mod_proxy redirection</p><p class="p3"><span class="s2"><a href="https://confluence.atlassian.com/display/DOC/Using+Apache+with+mod_proxy">https://confluence.atlassian.com/display/DOC/Using+Apache+with+mod_proxy</a></span></p><p class="p1">mod_disk_cache</p><p class="p3"><span class="s2"><a href="https://confluence.atlassian.com/display/DOC/Configuring+Apache+to+Cache+Static+Content+via+mod_disk_cache">https://confluence.atlassian.com/display/DOC/Configuring+Apache+to+Cache+Static+Content+via+mod_disk_cache</a></span></p><h4>proxyName and proxyPort</h4><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>su - confluence
+pico atlassian-confluence-4.2.6/conf/server.xml</pre></td></tr></table><p class="p1">add proxyName and Port to <strong>atlassian-confluence-4.2.6/conf/server.xml</strong></p><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>&lt;Connector className="org.apache.coyote.tomcat4.CoyoteConnector" port="8090" minProcessors="5"
+           maxProcessors="75"
+           enableLookups="false" redirectPort="8443" acceptCount="10" debug="0" connectionTimeout="20000"
+           useURIValidationHack="false" URIEncoding="UTF-8"/></pre></td></tr></table><p class="p1">exit #back to root</p><p class="p2">## Note: remed this at the end of the tag...           proxyName=&quot;wiki.makersalliance.com&quot; proxyPort=&quot;80&quot;</p><p class="p1">edit <strong>/usr/local/etc/apache22/httpd.conf</strong></p><p class="p1"><span class="s1">ServerName <a href="http://alpha-centauri.bsg.local/"><span class="s2">alpha-centauri.bsg.local:80</span></a></span></p><h4 class="p2">Apache includes/atlassian.conf</h4><p class="p1">create <strong>/usr/local/etc/apache22/Includes/atlassian.conf</strong></p><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre># VirtualHosts for jira.makersalliance.org and wiki.makersalliance.org
+NameVirtualHost *:*
+
+# JIRA
+&lt;VirtualHost *:*>
+    ServerName jira.makersalliance.org
+    ProxyRequests Off
+    ProxyPreserveHost On
+    &lt;Proxy *>
+        Order deny,allow
+        Allow from all
+    &lt;/Proxy>
+    ProxyPass / http://localhost:8080/
+    ProxyPassReverse / http://localhost:8080/
+    &lt;Location />
+        Order allow,deny
+        Allow from all
+    &lt;/Location>
+&lt;/VirtualHost>
+
+# Confluence
+&lt;VirtualHost *:*>
+    ServerName wiki.makersalliance.org
+    ProxyRequests Off
+    ProxyPreserveHost On
+    &lt;Proxy *>
+        Order deny,allow
+        Allow from all
+    &lt;/Proxy>
+    ProxyPass / http://localhost:8090/
+    ProxyPassReverse / http://localhost:8090/
+    &lt;Location />
+        Order allow,deny
+        Allow from all
+    &lt;/Location>
+&lt;/VirtualHost></pre></td></tr></table><p> </p><p class="p3"><span class="s1">//<a href="https://confluence.atlassian.com/display/JIRA/Integrating+JIRA+with+Apache"><span class="s2">https://confluence.atlassian.com/display/JIRA/Integrating+JIRA+with+Apache</span></a></span></p><p class="p1">/*JIRA - </p><p class="p1">/home/jira/atlassian-jira-5.0.6/conf/server.xml</p><p class="p1">leaving context path as &quot;&quot;</p><p class="p1">*/</p><p class="p2"> </p><p class="p7">TODO: Add SSL</p><p class="p2"> </p><h4 class="p1"><strong>Integration of JIRA and Confluence</strong></h4><p class="p3"><span class="s2"><a href="https://confluence.atlassian.com/display/DOC/Integrating+JIRA+and+Confluence">https://confluence.atlassian.com/display/DOC/Integrating+JIRA+and+Confluence</a></span></p><p class="p8"><span class="s7">Confluence </span><span class="s8">(</span>Administration &gt; Shorcut Links &gt; JIRA<span class="s8">)</span></p><p class="p2"> </p><p class="p1">JIRA Linker Plugin</p><p class="p1"> </p><h4 class="p1"><strong>Atlassian Mail Servers…</strong></h4><p class="p3"><span class="s2"><a href="http://smtp-server.neo.rr.com/"><strong>smtp-server.neo.rr.com</strong></a></span></p><p class="p1">need authentication? Though apple mail worked...</p><p class="p2"> </p><p class="p1">Temporary Fix until Google Domain:</p><p class="p1">smtp.gmail.com:465</p><p class="p1">jhgorse</p><p>Please be nice with outgoing emails. =)</p><p> </p><p> </p><p> </p><p> </p>
+        <p>&nbsp;</p>
+    </body>
+</html>

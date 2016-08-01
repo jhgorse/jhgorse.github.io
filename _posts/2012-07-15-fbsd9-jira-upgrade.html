@@ -1,0 +1,89 @@
+---
+layout: post
+title:  "FreeBSD 9.0 - JIRA 5.0.6 to 5.1 Upgrade"
+date:   2012-07-15 19:57:06 -0400
+categories: atlassian jira confluence jekyll
+---
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Source</title>
+        <link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css" media="all">
+<!--[if lt IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=lt+IE+9" media="all">
+<![endif]-->
+<!--[if IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=IE+9" media="all">
+<![endif]-->
+<!--[if lte IE 9]>
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+9" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/26/_/download/superbatch/css/batch.css?media=print" media="print">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/34b5e84e244983672af931d8c9a8841f/_/download/contextbatch/css/plugin.viewsource/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/6e2b0d19baee8ce068ab61cfa7146502/_/download/contextbatch/css/page/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/a65f396e965b778ef79da21b536b34b3/_/download/contextbatch/css/editor-content/batch.css" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/1/_/styles/colors.css?spaceKey=MAB" media="all">
+<link type="text/css" rel="stylesheet" href="/wiki/s/en_GB/3286/1/1.0/_/download/resources/com.atlassian.confluence.themes.default:styles/default-theme.css" media="all">
+
+    </head>
+
+    <body class="mceContentBody wiki-content fullsize">
+        <p>&nbsp;</p>         <p><img class="editor-inline-macro" src="/wiki/plugins/servlet/confluence/placeholder/macro?definition=e3RvY30&amp;locale=en_GB&amp;version=2" data-macro-name="toc"></p><p><s><a href="https://confluence.atlassian.com/display/JIRA/Upgrading+JIRA#UpgradingJIRA-upgradingonlinux">https://confluence.atlassian.com/display/JIRA/Upgrading+JIRA#UpgradingJIRA-upgradingonlinux</a></s></p><p><a href="https://confluence.atlassian.com/display/JIRA/Upgrading+JIRA+Manually">https://confluence.atlassian.com/display/JIRA/Upgrading+JIRA+Manually</a></p><h2>Snapshot of VM</h2><h3>Backup installation and data directories</h3><p>with a backup script to be run as user &quot;jira&quot;:</p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>#!/bin/sh
+PFIX=`date "+%Y-%m-%d-%H%M%S"`
+echo "tar zcf jira-data backup/jira-data.$PFIX.tar.gz"
+echo "tar zcf atlassian-jira-5.0.6 backup/atlassian-jira-5.0.6.$PFIX.tar.gz"
+
+tar zcf jira-data backup/jira-data.$PFIX.tar.gz
+tar zcf atlassian-jira-5.0.6 backup/atlassian-jira-5.0.6.$PFIX.tar.gz</pre></td></tr></table><h3><a href="http://www.postgresql.org/docs/9.1/static/backup-dump.html">Backup PostgreSQL 9.1 db</a></h3><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>Whole DB with users and roles:
+sudo -u pgsql pg_dumpall > backup/`hostname`.`date "+%Y-%m-%d-%H%M%S"`.pg
+
+Dump dbs with -Fc so that we can restore on a table by table basis, if necessary
+sudo -u pgsql pg_dump -Fc jira > backup/jira.`date "+%Y-%m-%d-%H%M%S"`.pg
+sudo -u pgsql pg_dump -Fc confluence > backup/confluence.`date "+%Y-%m-%d-%H%M%S"`.pg
+
+/root/backup</pre></td></tr></table><h2>Upgrade</h2><p>Try autolinux bin update tool, we are all POSIX, right?</p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>DON'T BOTHER: wget http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-5.1-x64.bin --no-check-certificate
+wget http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-5.1.tar.gz --no-check-certificate</pre></td></tr></table><p>The binary install fails with: ELF binary type &quot;0&quot; not known. Could probably resolve this with linux compat stuff for FBSD, but I don't care that much. <a href="https://confluence.atlassian.com/display/JIRA/Upgrading+JIRA+Manually">Manual upgrade for me</a>!</p><h3>jira.home</h3><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>echo "jira.home = /home/jira/jira-data" > /home/jira/atlassian-jira-5.1/atlassian-jira/WEB-INF/classes/jira-application.properties</pre></td></tr></table><h3>server.xml</h3><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=diff" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9ZGlmZn0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>diff -u atlassian-jira-5.1/conf/server.xml atlassian-jira-5.0.6/conf/server.xml
+--- atlassian-jira-5.1/conf/server.xml	2012-07-05 08:47:58.000000000 -0400
++++ atlassian-jira-5.0.6/conf/server.xml	2012-07-05 03:34:31.000000000 -0400
+@@ -61,7 +61,8 @@
+                    useBodyEncodingForURI="true"
+                    redirectPort="8443"
+                    acceptCount="100"
+-                   disableUploadTimeout="true"/>
++                   disableUploadTimeout="true"
++                   proxyName="jira.makersalliance.org" proxyPort="80" />
+
+         &lt;!--
+         ====================================================================================</pre></td></tr></table><p>Consider adding this proxyName and ProxyPort if things actually break.</p><h3>Edit startup scripts</h3><p>Install notes: <a class="confluence-link" href="/wiki/display/MAB/2012/07/02/JIRA+and+Confluence+Setup+-+FreeBSD+9.0#JIRAandConfluenceSetup-FreeBSD90-FreeBSD90-FreeBSDrcdstartupscript" data-anchor="FreeBSD90-FreeBSDrcdstartupscript" data-linked-resource-id="1179657" data-linked-resource-type="blogpost" data-linked-resource-default-alias="JIRA and Confluence Setup - FreeBSD 9.0#FreeBSD90-FreeBSDrcdstartupscript" data-base-url="http://wiki.makersalliance.org">JIRA and Confluence Setup - FreeBSD 9.0#FreeBSD90-FreeBSDrcdstartupscript</a></p><p>Shutdown JIRA 5.0.6</p><p>service jira stop</p><p>Edit<strong> /usr/local/etc/rc.d/jira</strong></p><table class="wysiwyg-macro" data-macro-name="code" data-macro-parameters="language=bash" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGU6bGFuZ3VhZ2U9YmFzaH0&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>...
+jira_start()
+{
+    echo -n " Starting JIRA"
+    su - jira -c '/home/jira/atlassian-jira-5.1/bin/startup.sh'
+}
+
+jira_stop()
+{
+    echo -n " Stopping JIRA"
+    su - jira -c '/home/jira/atlassian-jira-5.1/bin/shutdown.sh'
+}
+...</pre></td></tr></table><p>Startup JIRA 5.1</p><p>service jira start</p><p>tail -f /home/jira/atlassian-jira-5.1/logs/catalina.out</p><table class="wysiwyg-macro" data-macro-name="code" style="background-image: url(/wiki/plugins/servlet/confluence/placeholder/macro-heading?definition=e2NvZGV9&amp;locale=en_GB&amp;version=2); background-repeat: no-repeat;" data-macro-body-type="PLAIN_TEXT"><tr><td class="wysiwyg-macro-body"><pre>***************************************************************
+Upgrade Succeeded! JIRA has been upgraded to build number 768
+***************************************************************
+2012-07-15 20:01:21,014 main INFO      [atlassian.plugin.manager.DefaultPluginManager] Returned module for key 'com.atlassian.jira.whatsnew.jira-whatsnew-plugin:show-whats-new-flag' was null. Not enabling.
+2012-07-15 20:01:21,096 main INFO      [atlassian.jira.scheduler.JiraSchedulerLauncher] Starting the JIRA Scheduler....
+2012-07-15 20:01:21,186 main INFO      [atlassian.jira.scheduler.JiraSchedulerLauncher] JIRA Scheduler started.
+Jul 15, 2012 8:01:22 PM org.apache.coyote.http11.Http11AprProtocol start
+INFO: Starting Coyote HTTP/1.1 on http-8080
+Jul 15, 2012 8:01:22 PM org.apache.catalina.startup.Catalina start
+INFO: Server startup in 134146 ms
+2012-07-15 20:01:25,554 QuartzWorker-1 INFO ServiceRunner    Backup Service [jira.bc.dataimport.DefaultExportService] Data export completed in 450ms. Wrote 1642 entities to export in memory.
+2012-07-15 20:01:25,555 QuartzWorker-1 INFO ServiceRunner    Backup Service [jira.bc.dataimport.DefaultExportService] Attempting to save the Active Objects Backup
+2012-07-15 20:01:26,033 QuartzWorker-1 INFO ServiceRunner    Backup Service [jira.bc.dataimport.DefaultExportService] Finished saving the Active Objects Backup
+2012-07-15 20:01:26,036 QuartzWorker-1 ERROR ServiceRunner    Service Provider Token Remover [sal.jira.scheduling.JiraPluginSchedulerService] Unable to load a service descriptor for the job 'Service Provider Token Remover'. This is usually the result of an obsolete service that can removed in the Administration section.
+2012-07-15 20:01:28,734 Modification Check:thread-1 INFO      [atlassian.jira.startup.JiraStartupLogger]
+___ Modifications ___________________________
+     Modified Files                                : jira-application.properties
+     Removed Files                                 : None</pre></td></tr></table><p>SUCCESS!</p>
+        <p>&nbsp;</p>
+    </body>
+</html>
