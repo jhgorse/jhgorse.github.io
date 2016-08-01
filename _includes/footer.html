@@ -33,6 +33,22 @@
       </div>
     </div>
 
+    <p>Last modified {{ site.static_files.first.modified_time | date: "%Y-%m-%d %T %Z" }}.<br>
+    <font size=-1>Copyright {{ site.time | date: "%Y" }} Joe Gorse, all rights reserved.</font></p>
+    <p>
+    {% for file in site.static_files %}
+      {{ file.modified_time }} {{ file.path }}<br>
+    {% endfor %}
+    {% for p in site.posts %}
+      {{ p.last_modified_date }} {{ p.url }} <br>
+    {% endfor %}
+    {% for p in site.pages %}
+      {{ p.last_modified_date }} {{ p.url }} <br>
+    {% endfor %}
+    {{ page.last_modified_date | date: "%Y-%m-%d %T %Z" }}
+    </p>
   </div>
+
+
 
 </footer>
