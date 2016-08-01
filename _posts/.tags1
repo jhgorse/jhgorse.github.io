@@ -1,0 +1,17 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Notes	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^## Notes$/;"	function	line:11
+Templates	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^### Templates$/;"	function	line:13
+Collections	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^### Collections$/;"	function	line:17
+Pages	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^### Pages$/;"	function	line:21
+Next steps	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^## Next steps$/;"	function	line:25
+Requirements	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^### Requirements$/;"	function	line:27
+Notes on how to do these things	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^### Notes on how to do these things$/;"	function	line:36
+New post	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^#### New post$/;"	function	line:38
+or tcsh alias	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^# or tcsh alias$/;"	function	line:44
+Index of Posts/Pages	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^#### Index of Posts\/Pages$/;"	function	line:48
+Table of Contents	/Users/jhg/Documents/Website/_posts/2016-07-30-testing-1-2-3.md	/^#### Table of Contents$/;"	function	line:78
